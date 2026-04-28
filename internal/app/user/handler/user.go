@@ -27,27 +27,34 @@ func New(userService port.IUserService) port.IUserHandler {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param user body payload.User true "Param Register"
+// @Param user body payload.RegisterRequest true "Param Register"
 // @Success 200 {object} helper.Response
 // @Failure 400 {object} helper.Response
 // @Router /public-api/user/register [post]
 func (h *handler) Register(c *gin.Context) {
-	var (
-		dataUser payload.User
-	)
-	if err := c.ShouldBind(&dataUser); err != nil {
+	// 1. Pakai RegisterRequest supaya sinkron dengan JSON dari Frontend
+	var req payload.RegisterRequest
+
+	// 2. Gunakan ShouldBindJSON untuk menangkap body JSON
+	if err := c.ShouldBindJSON(&req); err != nil {
 		helper.ResponseError(c, err)
 		return
 	}
 
+	// 3. Validasi input
 	validate := validator.New()
-	err := validate.Struct(dataUser)
-	if err != nil {
+	if err := validate.Struct(req); err != nil {
 		helper.ResponseError(c, err)
 		return
 	}
 
-	res, err := h.userService.Register(c.Request.Context(), dataUser.User)
+	// 4. Mapping dari Request ke Model yang dibutuhkan Service
+	dataUser := model.AuthUserModel{
+		Username: req.Username,
+		Password: req.Password,
+	}
+
+	res, err := h.userService.Register(c.Request.Context(), dataUser)
 	if err != nil {
 		helper.ResponseError(c, err)
 		return
@@ -64,25 +71,21 @@ func (h *handler) Register(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param user body model.AuthUserModel true "Param Login"
+// @Param user body payload.RegisterRequest true "Param Login"
 // @Success 200 {object} helper.Response
 // @Failure 400 {object} helper.Response
 // @Router /public-api/user/login [post]
 func (h *handler) Login(c *gin.Context) {
-	var (
-		dataUser model.AuthUserModel
-	)
+	var req payload.RegisterRequest
 
-	if err := c.ShouldBind(&dataUser); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		helper.ResponseError(c, err)
 		return
 	}
 
-	validate := validator.New()
-	err := validate.Struct(dataUser)
-	if err != nil {
-		helper.ResponseError(c, err)
-		return
+	dataUser := model.AuthUserModel{
+		Username: req.Username,
+		Password: req.Password,
 	}
 
 	res, err := h.userService.Login(c.Request.Context(), dataUser)
@@ -115,6 +118,31 @@ func (h *handler) GetUser(c *gin.Context) {
 
 	helper.ResponseData(c, &helper.Response{
 		Message: "get user successfully",
+		Data:    res,
+	})
+}
+
+func (h *handler) UpdateUser(c *gin.Context) {
+	type RequestUpdate struct {
+		Username string `json:"username" binding:"required"`
+	}
+
+	var req RequestUpdate
+	if err := c.ShouldBindJSON(&req); err != nil {
+		helper.ResponseError(c, err)
+		return
+	}
+
+	username := c.GetString("username")
+	
+	res, err := h.userService.UpdateUser(c.Request.Context(), username, req.Username)
+	if err != nil {
+		helper.ResponseError(c, err)
+		return
+	}
+
+	helper.ResponseData(c, &helper.Response{
+		Message: "update username successfully",
 		Data:    res,
 	})
 }

@@ -12,4 +12,7 @@ type IUserService interface {
 	Login(ctx context.Context, user model.AuthUserModel) (token string, err error)
 
 	GetUser(ctx context.Context, username string) (res *payload.User, err error)
+
+	UpdateUser(ctx context.Context, username string, newUsername string) (interface{}, error)
 }
+

@@ -14,4 +14,6 @@ type IUserHandler interface {
 
 	// (GET /user/)
 	GetUser(ctx *gin.Context)
+
+	UpdateUser(ctx *gin.Context)
 }

@@ -21,4 +21,6 @@ func (r routes) New(router *gin.RouterGroup, handler port.IUserHandler) {
 
 func (r routes) NewProfile(router *gin.RouterGroup, handler port.IUserHandler) {
 	router.GET("/", handler.GetUser)
+	router.PUT("", handler.UpdateUser)
 }
+

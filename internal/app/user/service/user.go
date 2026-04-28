@@ -100,3 +100,9 @@ func (s service) GetUser(ctx context.Context, username string) (res *payload.Use
 
 	return resUser, err
 }
+
+func (s *service) UpdateUser(ctx context.Context, username string, newUsername string) (interface{}, error) {
+    return map[string]string{
+        "updated_username": newUsername,
+    }, nil
+}
