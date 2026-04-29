@@ -89,6 +89,8 @@ func StartServer(setupData setup.SetupData) {
 
 func initRoute(router *gin.Engine, internalAppStruct setup.InternalAppStruct) {
 	apiRouter := router.Group("/v1/api")
+	
+	// Rute yang butuh login/auth
 	userServer.Routes.NewProfile(apiRouter.Group("/profile"), internalAppStruct.Handler.UserHandler)
 	postServer.Routes.New(apiRouter.Group("/post"), internalAppStruct.Handler.PostHandler)
 	commentServer.Routes.New(apiRouter.Group("/comment"), internalAppStruct.Handler.CommentHandler)
@@ -97,5 +99,11 @@ func initRoute(router *gin.Engine, internalAppStruct setup.InternalAppStruct) {
 func initPublicRoute(router *gin.Engine, internalAppStruct setup.InternalAppStruct) {
 	apiRouter := router.Group("/v1/public-api")
 
-	userServer.Routes.New(apiRouter.Group("/user"), internalAppStruct.Handler.UserHandler)
+	// PERBAIKAN: Tambahkan internalAppStruct.Handler.BankAccountHandler di akhir argumen
+	userServer.Routes.New(
+		apiRouter, 
+		internalAppStruct.Handler.UserHandler, 
+		internalAppStruct.Handler.CompanyHandler, 
+		internalAppStruct.Handler.BankAccountHandler, // Ini yang baru ditambahkan
+	)
 }
